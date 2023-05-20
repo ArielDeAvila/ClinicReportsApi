@@ -23,8 +23,10 @@ public class HospitalService : IHospitalService
 
         var hospitals = await _unitOfWork.HospitalRepository.GetAll();
 
-        var hospitalsDTO = new List<HospitalDTO>();
-        foreach (var hospital in hospitals) hospitalsDTO.Add((HospitalDTO)hospital);
+        //var hospitalsDTO = new List<HospitalDTO>();
+        //foreach (var hospital in hospitals) hospitalsDTO.Add((HospitalDTO)hospital);
+
+        var hospitalsDTO = (List<HospitalDTO>)hospitals;
 
         if (hospitals is not null)
         {
@@ -102,10 +104,11 @@ public class HospitalService : IHospitalService
 
         var created = await _unitOfWork.CommitAsync();
 
-        if(created > 0)
+        response.Data = created > 0;
+
+        if(response.Data)
         {
             response.Success = true;
-            response.Data = true;
             response.Message = ReplyMessage.MESSAGE_SAVE;
         }
         else
@@ -137,10 +140,11 @@ public class HospitalService : IHospitalService
 
         var deleted = await _unitOfWork.CommitAsync();
 
-        if(deleted > 0)
+        response.Data = deleted > 0;
+
+        if (response.Data)
         {
             response.Success = true;
-            response.Data = true;
             response.Message = ReplyMessage.MESSAGE_DELETE;
         }
         else
@@ -175,10 +179,11 @@ public class HospitalService : IHospitalService
 
         var updated = await _unitOfWork.CommitAsync();
 
-        if (updated > 0)
+        response.Data = updated > 0;
+
+        if (response.Data)
         {
             response.Success = true;
-            response.Data = true;
             response.Message = ReplyMessage.MESSAGE_UPDATE;
         }
         else

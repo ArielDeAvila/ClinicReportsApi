@@ -11,5 +11,9 @@ public class MedicalServiceConfiguration : IEntityTypeConfiguration<MedicalServi
         builder.HasKey(ms => ms.Id).HasName("PK_MedicalService");
 
         builder.Property(ms => ms.AuditDateCreated).HasDefaultValue(DateTime.Now);
+
+        builder.HasOne(ms => ms.Hospital).WithMany(h => h.MedicalServices)
+               .HasForeignKey(ms => ms.HospitalId)
+               .HasConstraintName("FK_Hospital_MedicalService");
     }
 }

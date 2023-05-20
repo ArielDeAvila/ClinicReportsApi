@@ -15,8 +15,6 @@ public partial class SystemReportContext : DbContext
 	
 	public DbSet<Hospital> Hospitals { get; set;}
 
-	public DbSet<HospitalMedicalService> HospitalServices { get; set;}
-
 	public DbSet<MedicalService> MedicalServices { get; set; }
 
 	public DbSet<Report> Reports { get; set; }

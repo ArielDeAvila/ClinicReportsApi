@@ -24,7 +24,7 @@ public class HospitalDTO
             Identification = hospital.Identification,
             PhoneNumber = hospital.PhoneNumber,
             Address = hospital.Address,
-            Services = ConvertList.ToListMedicalServiceDTO(hospital.HospitalServices.Select(ms => ms.Service).ToList())
+            Services = ConvertList.ToListMedicalServiceDTO(hospital.MedicalServices.ToList())
 
         };
 

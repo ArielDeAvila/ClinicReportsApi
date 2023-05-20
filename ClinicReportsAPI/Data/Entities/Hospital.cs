@@ -2,7 +2,7 @@
 
 public class Hospital : BaseUser
 {
-    public ICollection<HospitalMedicalService> HospitalServices { get; set; } = new List<HospitalMedicalService>();
+    public ICollection<MedicalService> MedicalServices { get; set; } = new List<MedicalService>();
 
     public ICollection<Doctor> Doctors { get; set; } = new List<Doctor>();
 

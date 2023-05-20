@@ -15,7 +15,7 @@ public class HospitalRepository : GenericRepository<Hospital>, IHospitalReposito
     public override async Task<IEnumerable<Hospital>> GetAll()
     {
 		var hospitals = await _context.Hospitals.Where(h => h.AuditDateDelete==null)
-										  .Include(h => h.HospitalServices)
+										  .Include(h => h.MedicalServices)
 										  .AsNoTracking().ToListAsync();
 
         return hospitals;
@@ -23,82 +23,56 @@ public class HospitalRepository : GenericRepository<Hospital>, IHospitalReposito
 
 	public override async Task<Hospital> GetById(int id)
 	{
-		var hospital = await _context.Hospitals.Include(h => h.HospitalServices).ThenInclude(h => h.Service)
-						   .AsNoTracking().FirstOrDefaultAsync(h => h.AuditDateDelete == null && h.Id == id);
+		var hospital = await _context.Hospitals.Include(h => h.MedicalServices)
+						   .AsNoTracking().FirstOrDefaultAsync(h => h.AuditDateDelete == null && h.Id.Equals(id));
 
 		return hospital!;								   
 	}
 
     public async void Update(Hospital hospital, List<MedicalService> medicalServices)
     {
-		var existingHospital = await _context.Hospitals.Include(h => h.HospitalServices).ThenInclude(h => h.Service)
+		var existingHospital = await _context.Hospitals.Include(h => h.MedicalServices)
 													   .FirstAsync(h => h.Id.Equals(hospital.Id));
 
 		existingHospital.AuditDateUpdate = DateTime.Now;
 		existingHospital.Name = hospital.Name;
 		existingHospital.Address = hospital.Address;
-		existingHospital.Email = hospital.Email;
 		existingHospital.PhoneNumber = hospital.PhoneNumber;
 
-		foreach (var service in existingHospital.HospitalServices)
-			if (!medicalServices.Exists(ms => ms.Name.StartsWith(service.Service.Name)))
-				service.Service.AuditDateDelete = DateTime.Now;
+		//Revisa dentro de los servicios existentes sí alguno de ellos no se encuentra en la nueva lista
+		//de servicios que se entra por parámetro, de ser así lo elimina. 
+		foreach (var service in existingHospital.MedicalServices)
+			if (!medicalServices.Exists(ms => ms.Name.StartsWith(service.Name))) // si es un servicio nuevo no tendrá Id
+				service.AuditDateDelete = DateTime.Now;
 
 		var newMedicalServices = new List<MedicalService>();
+		var existingMedicalServices = existingHospital.MedicalServices.ToList();
 
+        //Revisa en la nueva lista de servicios que entra por parámetro sí hay servicios que no se encuentre
+        //en la lista de servicios existentes, de ser así los agrega a lista de nuevos servicios
         foreach (var medicalService in medicalServices)
-        {
-			if(!existingHospital.HospitalServices.ToList().Exists(hs => hs.ServiceId.Equals(medicalService.Id)))
-			{
+			if(!existingMedicalServices.Exists(hs => hs.Id.Equals(medicalService.Id)))
 				newMedicalServices.Add(medicalService);
-			}
-        }
-
-		existingHospital.HospitalServices = HospitalMedicalServices(hospital, medicalServices);
 
         _context.Hospitals.Update(existingHospital);
 		_context.Entry(existingHospital).Property(h => h.Identification).IsModified = false;
-		if (newMedicalServices.Count > 0) _context.MedicalServices.AddRange(newMedicalServices);
+        _context.Entry(existingHospital).Property(h => h.Email).IsModified = false;
+
+        if (newMedicalServices.Count > 0) 
+			_context.MedicalServices.AddRange(newMedicalServices);
     }
 
     public void Create(Hospital hospital, List<MedicalService> medicalServices)
 	{
 		hospital.AuditDateCreated = DateTime.Now;
-
-		//se asigna la lista creada a la propiedad de navegación del hospital
-		hospital.HospitalServices = HospitalMedicalServices(hospital,medicalServices);
+		
+		foreach(var service in medicalServices) service.HospitalId = hospital.Id;
 
 		//se agregan las entidades al contexto
 		_context.Hospitals.Add(hospital);
 		_context.MedicalServices.AddRange(medicalServices);
 
 	}
-
-	private static List<HospitalMedicalService> HospitalMedicalServices(Hospital hospital, List<MedicalService> medicalServices)
-	{
-        //Se crea una lista de HospitalMedicalService
-        var hospitalMedicalServices = new List<HospitalMedicalService>();
-
-        foreach (var medicalService in medicalServices)
-        {
-            //se crea una nueva instancia de HospitalMedicalService y en sus propiedades de navegación
-            //se asignan las instancias correspondientes
-            var hospitalMedicalService = new HospitalMedicalService()
-            {
-                Hospital = hospital,
-                Service = medicalService
-            };
-
-            //la nueva instancia se agrega a la lista creada
-            hospitalMedicalServices.Add(hospitalMedicalService);
-
-            //en la propiedad de navegación del servicio medico se asigna una nueva lista con la nueva instancia
-            medicalService.HospitalServices = new List<HospitalMedicalService> { hospitalMedicalService };
-
-        }
-
-		return hospitalMedicalServices;
-    }
 
     //TODO: crear nuevos métodos para el cambio de contraseña y de email
 
