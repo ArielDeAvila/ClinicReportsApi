@@ -5,7 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace ClinicReportsAPI.Controllers;
 
-//TODO: Las rutas no deben ser accedidas por usuarios que no sean de tipo Hospital
+//TODO: Las rutas no deben ser accedidas por usuarios que no sean de tipo Hospital y Doctor
 [Route("api/[controller]")]
 [ApiController]
 public class DoctorController : ControllerBase

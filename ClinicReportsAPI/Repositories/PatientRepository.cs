@@ -2,6 +2,7 @@
 using ClinicReportsAPI.Data.Entities;
 using ClinicReportsAPI.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace ClinicReportsAPI.Repositories;
 
@@ -28,6 +29,15 @@ public class PatientRepository : GenericRepository<Patient>, IPatientRepository
 
         return patient!;
     }
+
+    public async Task<Patient> GetPatient(Expression<Func<Patient, bool>> expression)
+    {
+        var patient = await _context.Patients.AsNoTracking()
+                                             .Include(p => p.Hospital)
+                                             .FirstOrDefaultAsync(expression);
+
+        return patient!;
+    }  
 
     public override async void Update(Patient patient)
     {

@@ -95,6 +95,8 @@ public class HospitalService : IHospitalService
     {
         var response = new BaseResponse<bool>();
 
+        //TODO: verificar que el email y la identificación no existan
+
         var hospital = (Hospital)hospitalDTO;
 
         var medicalServices = ConvertList.ToListMedicalService(hospitalDTO.Services);

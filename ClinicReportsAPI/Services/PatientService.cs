@@ -62,7 +62,7 @@ public class PatientService : IPatientService
     {
         var response = new BaseResponse<bool>();
 
-        //TODO: encriptar contraseña
+        //TODO: encriptar contraseña, verificar que el email y la identificación no existan
         _unitOfWork.PatientRepository.Create((Patient)patientDTO);
 
         var created = await _unitOfWork.CommitAsync();
