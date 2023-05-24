@@ -4,6 +4,7 @@ using ClinicReportsAPI.DTOs.Register;
 using ClinicReportsAPI.Services.Interfaces;
 using ClinicReportsAPI.Tools;
 using ClinicReportsAPI.UnitOfWork;
+using BC = BCrypt.Net.BCrypt;
 
 namespace ClinicReportsAPI.Services;
 
@@ -37,11 +38,11 @@ public class PatientService : IPatientService
         return response;
     }
 
-    public async Task<BaseResponse<PatientDTO>> GetById(int id)
+    public async Task<BaseResponse<PatientDTO>> GetByIdentification(string id)
     {
         var response = new BaseResponse<PatientDTO>();
 
-        var patient = await _unitOfWork.PatientRepository.GetById(id);
+        var patient = await _unitOfWork.PatientRepository.GetByIdentification(id);
 
         if(patient is not null)
         {
@@ -104,6 +105,80 @@ public class PatientService : IPatientService
 
         return response;
 
+    }
+
+    public async Task<BaseResponse<bool>> UpdateEmail(UpdateEmailDTO emailDto)
+    {
+        var response = new BaseResponse<bool>();
+
+        var existingPatient = await _unitOfWork.PatientRepository.GetPatient(d => d.Email.Equals(emailDto.NewEmail));
+
+        if (existingPatient is not null)
+        {
+            response.Success = false;
+            response.Message = ReplyMessage.MESSAGE_EXISTS;
+
+            return response;
+        }
+
+        var patient = await _unitOfWork.PatientRepository.GetPatient(d => d.Email.Equals(emailDto.OldEmail));
+
+        patient.Email = emailDto.NewEmail;
+
+        _unitOfWork.PatientRepository.UpdateEmail(patient);
+
+        var updated = await _unitOfWork.CommitAsync();
+
+        response.Data = updated > 0;
+
+        if (response.Data)
+        {
+            response.Success = true;
+            response.Message = ReplyMessage.MESSAGE_UPDATE;
+        }
+        else
+        {
+            response.Success = false;
+            response.Message = ReplyMessage.MESSAGE_FAILED;
+        }
+
+        return response;
+    }
+
+    public async Task<BaseResponse<bool>> UpdatePassword(UpdatePasswordDTO passwordDto, int id)
+    {
+        var response = new BaseResponse<bool>();
+
+        var patient = await _unitOfWork.PatientRepository.GetPatient(d => d.Id.Equals(id));
+
+        if (!BC.Verify(passwordDto.OldPassword, patient.Password))
+        {
+            response.Success = false;
+            response.Message = ReplyMessage.MESSAGE_PASSWORD_ERROR;
+
+            return response;
+        }
+
+        patient.Password = BC.HashPassword(passwordDto.NewPassword);
+
+        _unitOfWork.PatientRepository.UpdatePassword(patient);
+
+        var update = await _unitOfWork.CommitAsync();
+
+        response.Data = update > 0;
+
+        if (response.Data)
+        {
+            response.Success = true;
+            response.Message = ReplyMessage.MESSAGE_UPDATE;
+        }
+        else
+        {
+            response.Success = false;
+            response.Message = ReplyMessage.MESSAGE_FAILED;
+        }
+
+        return response;
     }
 
     public async Task<BaseResponse<bool>> Remove(int id)

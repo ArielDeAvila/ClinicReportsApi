@@ -1,5 +1,4 @@
 ﻿using ClinicReportsAPI.Data.Entities;
-using ClinicReportsAPI.Tools;
 
 namespace ClinicReportsAPI.DTOs.Register;
 

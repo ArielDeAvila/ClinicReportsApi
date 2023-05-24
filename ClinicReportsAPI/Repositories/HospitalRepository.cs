@@ -83,6 +83,20 @@ public class HospitalRepository : GenericRepository<Hospital>, IHospitalReposito
 
 	}
 
+    public void UpdateEmail(Hospital hospital)
+    {
+        _context.Hospitals.Update(hospital);
+        _context.Entry(hospital).Property(d => d.Identification).IsModified = false;
+        _context.Entry(hospital).Property(d => d.Password).IsModified = false;
+    }
+
+    public void UpdatePassword(Hospital hospital)
+    {
+        _context.Hospitals.Update(hospital);
+        _context.Entry(hospital).Property(d => d.Identification).IsModified = false;
+        _context.Entry(hospital).Property(d => d.Email).IsModified = false;
+    }
+
     //TODO: crear nuevos métodos para el cambio de contraseña y de email
 
 }

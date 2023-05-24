@@ -1,10 +1,15 @@
 ﻿using ClinicReportsAPI.DTOs;
 using ClinicReportsAPI.DTOs.Register;
+using ClinicReportsAPI.Extensions;
 using ClinicReportsAPI.Services.Interfaces;
+using ClinicReportsAPI.Tools;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace ClinicReportsAPI.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class PatientController : ControllerBase
@@ -16,7 +21,7 @@ public class PatientController : ControllerBase
         _service = service;
     }
 
-    //TODO: no deben ser accedida por usuarios que no sean de tipo Hospital
+    [AuthorizeRole("Hospital")]
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
@@ -25,15 +30,16 @@ public class PatientController : ControllerBase
         return Ok(response);
     }
 
-    //TODO: no deben ser accedida por usuarios que no sean de tipo Doctor y hospital
-    [HttpGet("{id:int}")]
-    public async Task<IActionResult> GetById(int id)
+    [AuthorizeRole("Hospital", "Doctor")]
+    [HttpGet("{id:string}")]
+    public async Task<IActionResult> GetByIdentification(string id)
     {
-        var response = await _service.GetById(id);
+        var response = await _service.GetByIdentification(id);
 
         return Ok(response);
     }
 
+    [AllowAnonymous]
     [HttpPost("Register")]
     public async Task<IActionResult> Create([FromBody] PatientRegisterDTO patientDTO)
     {
@@ -43,6 +49,7 @@ public class PatientController : ControllerBase
     }
 
     //TODO: validar
+    [AuthorizeRole("Patient", "Hospital")]
     [HttpPut("Edit")]
     public async Task<IActionResult> Update([FromBody] PatientDTO patientDTO)
     {
@@ -51,7 +58,8 @@ public class PatientController : ControllerBase
         return Ok(response);
     }
 
-    //TODO: no deben ser accedida por usuarios que no sean de tipo Hospital
+
+    [AuthorizeRole("Hospital")]
     [HttpDelete("Remove/{id:int}")]
     public async Task<IActionResult> Remove(int id)
     {
@@ -60,6 +68,34 @@ public class PatientController : ControllerBase
         return Ok(reponse);
     }
 
-    //TODO: Crear login
+    [AuthorizeRole("Patient", "Hospital")]
+    [HttpPut("ChangeEmail")]
+    public async Task<IActionResult> UpdatePassword(UpdateEmailDTO requestDto)
+    {
+        var response = await _service.UpdateEmail(requestDto);
+
+        return Ok(response);
+    }
+
+    [AuthorizeRole("Patient", "Hospital")]
+    [HttpPut("ChangePassword")]
+    public async Task<IActionResult> UpdatePasswotd(UpdatePasswordDTO requestDto)
+    {
+        var uniqueNameClaim = User.Claims.FirstOrDefault(c => c.Type == JwtRegisteredClaimNames.UniqueName);
+
+        if (uniqueNameClaim == null) return BadRequest(new BaseResponse<bool>
+        {
+            Success = false,
+            Message = ReplyMessage.MESSAGE_FAILED
+        });
+
+        int id = int.Parse(uniqueNameClaim.Value);
+
+        var response = await _service.UpdatePassword(requestDto, id);
+
+        return Ok(response);
+
+    }
+
 
 }

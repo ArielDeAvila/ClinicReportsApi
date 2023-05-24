@@ -47,6 +47,29 @@ public class PatientRepository : GenericRepository<Patient>, IPatientRepository
         
     }
 
+    public async Task<Patient> GetByIdentification(string identification)
+    {
+        var patient = await _context.Patients.AsNoTracking()
+                                             .Include(p => p.Hospital)
+                                             .FirstOrDefaultAsync(p => p.Identification.Equals(identification) && p.AuditDateDelete == null);
+
+        return patient!;
+    }
+
     //TODO: crear nuevos métodos para el cambio de contraseña y de email
+
+    public void UpdateEmail(Patient patient)
+    {
+        _context.Patients.Update(patient);
+        _context.Entry(patient).Property(d => d.Identification).IsModified = false;
+        _context.Entry(patient).Property(d => d.Password).IsModified = false;
+    }
+
+    public void UpdatePassword(Patient patient)
+    {
+        _context.Patients.Update(patient);
+        _context.Entry(patient).Property(d => d.Identification).IsModified = false;
+        _context.Entry(patient).Property(d => d.Email).IsModified = false;
+    }
 
 }

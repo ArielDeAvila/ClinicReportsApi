@@ -13,4 +13,6 @@ public interface IHospitalService
     Task<BaseResponse<bool>> Create(HospitalRegisterDTO hospital);
     Task<BaseResponse<bool>> Update(HospitalDTO hospital);
     Task<BaseResponse<bool>> Remove(int id);
+    Task<BaseResponse<bool>> UpdateEmail(UpdateEmailDTO emailDto);
+    Task<BaseResponse<bool>> UpdatePassword(UpdatePasswordDTO passwordDto, int id);
 }

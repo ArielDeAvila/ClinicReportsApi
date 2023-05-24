@@ -28,18 +28,27 @@ public class LoginService : ILoginService
 
         BaseUser account;
 
+        string rol = ((AccountType) requestDto.AccountType).ToString();
+
         switch (requestDto.AccountType) 
         {
-            case 1:
+            case (int)AccountType.Doctor:
+
                 account = await _unitOfWork.DoctorRepository
                     .GetDoctor(d => d.Identification.Equals(requestDto.Identification)); break;
-            case 2:
+
+            case (int)AccountType.Hospital:
+
                 account = await _unitOfWork.HospitalRepository
                     .GetHospital(h => h.Identification.Equals(requestDto.Identification)); break;
-            case 3:
+
+            case (int)AccountType.Patient:
+
                 account = await _unitOfWork.PatientRepository
                     .GetPatient(p => p.Identification.Equals(requestDto.Identification)); break;
+
             default:
+
                 response.Success = false;
                 response.Message = ReplyMessage.MESSAGE_FAILED;
                 return response;      
@@ -48,7 +57,7 @@ public class LoginService : ILoginService
         if(account is not null && BC.Verify(requestDto.Password, account.Password))
         {
             response.Success = true;
-            response.Data = GenerateToken(account,((AccountType)requestDto.AccountType).ToString());
+            response.Data = GenerateToken(account, rol);
             response.Message = ReplyMessage.MESSAGE_TOKEN;
         }
         else

@@ -5,6 +5,7 @@ using ClinicReportsAPI.DTOs.Register;
 using ClinicReportsAPI.Services.Interfaces;
 using ClinicReportsAPI.Tools;
 using ClinicReportsAPI.UnitOfWork;
+using BC = BCrypt.Net.BCrypt;
 
 namespace ClinicReportsAPI.Services;
 
@@ -196,5 +197,79 @@ public class HospitalService : IHospitalService
 
         return response;
 
+    }
+
+    public async Task<BaseResponse<bool>> UpdateEmail(UpdateEmailDTO emailDto)
+    {
+        var response = new BaseResponse<bool>();
+
+        var existingHospital = await _unitOfWork.HospitalRepository.GetHospital(d => d.Email.Equals(emailDto.NewEmail));
+
+        if (existingHospital is not null)
+        {
+            response.Success = false;
+            response.Message = ReplyMessage.MESSAGE_EXISTS;
+
+            return response;
+        }
+
+        var hospital = await _unitOfWork.HospitalRepository.GetHospital(d => d.Email.Equals(emailDto.OldEmail));
+
+        hospital.Email = emailDto.NewEmail;
+
+        _unitOfWork.HospitalRepository.UpdateEmail(hospital);
+
+        var updated = await _unitOfWork.CommitAsync();
+
+        response.Data = updated > 0;
+
+        if (response.Data)
+        {
+            response.Success = true;
+            response.Message = ReplyMessage.MESSAGE_UPDATE;
+        }
+        else
+        {
+            response.Success = false;
+            response.Message = ReplyMessage.MESSAGE_FAILED;
+        }
+
+        return response;
+    }
+
+    public async Task<BaseResponse<bool>> UpdatePassword(UpdatePasswordDTO passwordDto, int id)
+    {
+        var response = new BaseResponse<bool>();
+
+        var hospital = await _unitOfWork.HospitalRepository.GetHospital(d => d.Id.Equals(id));
+
+        if (!BC.Verify(passwordDto.OldPassword, hospital.Password))
+        {
+            response.Success = false;
+            response.Message = ReplyMessage.MESSAGE_PASSWORD_ERROR;
+
+            return response;
+        }
+
+        hospital.Password = BC.HashPassword(passwordDto.NewPassword);
+
+        _unitOfWork.HospitalRepository.UpdatePassword(hospital);
+
+        var update = await _unitOfWork.CommitAsync();
+
+        response.Data = update > 0;
+
+        if (response.Data)
+        {
+            response.Success = true;
+            response.Message = ReplyMessage.MESSAGE_UPDATE;
+        }
+        else
+        {
+            response.Success = false;
+            response.Message = ReplyMessage.MESSAGE_FAILED;
+        }
+
+        return response;
     }
 }

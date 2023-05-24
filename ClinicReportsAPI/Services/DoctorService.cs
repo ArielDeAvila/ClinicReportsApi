@@ -106,7 +106,8 @@ public class DoctorService : IDoctorService
             }
         }
 
-        dto.Password = BC.HashPassword(dto.Password);
+        // TODO: Crear una contraseña generica
+        // dto.Password = BC.HashPassword(dto.Password);
 
         _unitOfWork.DoctorRepository.Create((Doctor)dto);
 

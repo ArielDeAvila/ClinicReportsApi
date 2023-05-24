@@ -1,5 +1,4 @@
 ﻿using ClinicReportsAPI.Data.Entities;
-using ClinicReportsAPI.DTOs.Name;
 
 namespace ClinicReportsAPI.DTOs.Register;
 
@@ -8,7 +7,6 @@ public class DoctorRegisterDTO
     public int Id { get; set; }
     public string Name { get; set; } = null!;
     public string Email { get; set; } = null!;
-    public string Password { get; set; } = null!;
     public string Identification { get; set; } = null!;
     public string PhoneNumber { get; set; } = null!;
     public string Address { get; set; } = null!;
@@ -24,7 +22,6 @@ public class DoctorRegisterDTO
             Id = doctorDTO.Id,
             Name = doctorDTO.Name,
             Email = doctorDTO.Email,
-            Password = doctorDTO.Password,
             Identification = doctorDTO.Identification,
             PhoneNumber = doctorDTO.PhoneNumber,
             Address = doctorDTO.Address,
