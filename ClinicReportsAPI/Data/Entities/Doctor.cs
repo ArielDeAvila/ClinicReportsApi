@@ -6,6 +6,8 @@ public class Doctor : BaseUser
 
     public string MedicalSpecialty { get; set; } = null!;
 
+    public bool IsFirstLogin { get; set; } = true;
+
     public int HospitalId { get; set; }
     public Hospital Hospital { get; set; } = null!;
 

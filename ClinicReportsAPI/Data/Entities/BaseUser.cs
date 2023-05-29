@@ -8,6 +8,7 @@ public class BaseUser : BaseEntity
     public string Identification { get; set; } = null!;
     public string PhoneNumber { get; set; } = null!;
     public string Address { get; set; } = null!;
-    public bool IsVerified { get; set; } = false;
+    public string VerifyToken { get; set; } = null!;
+    public DateTime? VerifiedAt { get; set; }    
 
 }

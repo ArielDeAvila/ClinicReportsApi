@@ -106,17 +106,21 @@ public class DoctorService : IDoctorService
             }
         }
 
-        // TODO: Crear una contraseña generica
-        // dto.Password = BC.HashPassword(dto.Password);
+        var doctor = (Doctor)dto;
+        doctor.Password = TokenGenerator.GetRandomString(8);
+        doctor.VerifyToken = TokenGenerator.GenerateRandomToken(16);
 
-        _unitOfWork.DoctorRepository.Create((Doctor)dto);
+        _unitOfWork.DoctorRepository.Create(doctor);
 
         var created = await _unitOfWork.CommitAsync();
 
-        if(created > 0)
+        //TODO: Enviar correo de verificación y contraseña 
+
+        response.Data = created > 0;
+
+        if (response.Data)
         {
             response.Success = true;
-            response.Data = true;
             response.Message = ReplyMessage.MESSAGE_SAVE;
         }
         else

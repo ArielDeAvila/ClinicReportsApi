@@ -12,6 +12,7 @@ public static class InjectionExtensions
         services.AddScoped<IPatientService, PatientService>();
         services.AddScoped<IDoctorService, DoctorService>();
         services.AddScoped<ILoginService, LoginService>();
+        services.AddScoped<IEmailService, EmailService>();
         
         return services;
     }

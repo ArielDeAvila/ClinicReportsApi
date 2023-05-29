@@ -33,27 +33,16 @@ public class HospitalController : ControllerBase
     [AllowAnonymous]
     [HttpPost("Register")]
     public async Task<IActionResult> RegisterHospital([FromBody] HospitalRegisterDTO hospitalDTO)
-    {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest();
-        }
-
+    {        
         var response = await _service.Create(hospitalDTO);
 
         return Ok(response);
-
     }
 
     [AuthorizeRole("Hospital")]
     [HttpPut("Edit/{id:int}")]
     public async Task<IActionResult> EditHospital([FromBody] HospitalDTO hospitalDTO)
     {
-        if (!ModelState.IsValid)
-        {
-            return BadRequest();
-        }
-
         var response = await _service.Update(hospitalDTO); 
         
         return Ok(response);

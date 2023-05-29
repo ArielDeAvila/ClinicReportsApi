@@ -16,5 +16,8 @@ public class ReplyMessage
     public const string MESSAGE_VALIDATE = "Errores de validacion";
     public const string MESSAGE_FAILED = "Operacion fallida";
     public const string MESSAGE_PASSWORD_ERROR = "Contraseña anterior incorrecta";
+    public const string MESSAGE_VERIFIED = "Cuenta verificada con éxito";
+    public const string MESSAGE_ALREADY_VERIFIED = "La cuenta ya se encuentra verificada";
+    public const string MESSAGE_UNVERIFIED = "La cuenta no se encuentra verificada";
 
 }

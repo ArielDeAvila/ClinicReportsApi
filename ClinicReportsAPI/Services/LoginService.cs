@@ -24,19 +24,12 @@ public class LoginService : ILoginService
 
     public async Task<BaseResponse<string>> Login(LoginRequestDTO requestDto)
     {
-        var response = new BaseResponse<string>();
-
         BaseUser account;
 
         string rol = ((AccountType) requestDto.AccountType).ToString();
 
         switch (requestDto.AccountType) 
         {
-            case (int)AccountType.Doctor:
-
-                account = await _unitOfWork.DoctorRepository
-                    .GetDoctor(d => d.Identification.Equals(requestDto.Identification)); break;
-
             case (int)AccountType.Hospital:
 
                 account = await _unitOfWork.HospitalRepository
@@ -49,16 +42,54 @@ public class LoginService : ILoginService
 
             default:
 
-                response.Success = false;
-                response.Message = ReplyMessage.MESSAGE_FAILED;
-                return response;      
+                return new BaseResponse<string>
+                {
+                    Success = false,
+                    Message = ReplyMessage.MESSAGE_FAILED
+                };      
         }
 
-        if(account is not null && BC.Verify(requestDto.Password, account.Password))
+        return GenerateResponse(account, rol, requestDto.Password);
+        
+    }
+
+    public async Task<BaseResponse<string>> LoginDoctor(LoginRequestDTO requestDto)
+    {
+        var account = await _unitOfWork.DoctorRepository
+                                .GetDoctor(d => d.Identification.Equals(requestDto.Identification));
+
+        string rol = ((AccountType)requestDto.AccountType).ToString();
+
+        if (account.IsFirstLogin)
         {
-            response.Success = true;
-            response.Data = GenerateToken(account, rol);
-            response.Message = ReplyMessage.MESSAGE_TOKEN;
+            return new BaseResponse<string>
+            {
+                Success = false,
+                Data = $"{_configuration["Application:BaseUrl"]}/changepassword",
+                Message = "Por favor, cambie su contraseña"
+            };
+        }
+
+        return GenerateResponse(account, rol, requestDto.Password);
+    }
+
+    private BaseResponse<string> GenerateResponse(BaseUser account, string rol, string password)
+    {
+        var response = new BaseResponse<string>();
+
+        if (account is not null && BC.Verify(password, account.Password))
+        {
+            if (account.VerifiedAt is not null)
+            {
+                response.Success = true;
+                response.Data = GenerateToken(account, rol);
+                response.Message = ReplyMessage.MESSAGE_TOKEN;
+            }
+            else
+            {
+                response.Success = false;
+                response.Message = ReplyMessage.MESSAGE_UNVERIFIED;
+            }
         }
         else
         {
@@ -67,6 +98,7 @@ public class LoginService : ILoginService
         }
 
         return response;
+
     }
 
     private string GenerateToken(BaseUser account, string rol)
