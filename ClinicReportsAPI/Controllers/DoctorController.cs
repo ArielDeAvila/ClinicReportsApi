@@ -15,10 +15,12 @@ namespace ClinicReportsAPI.Controllers;
 public class DoctorController : ControllerBase
 {
     private readonly IDoctorService _service;
+    private readonly IVerifyEmailService _verifyService;
 
-    public DoctorController(IDoctorService service)
+    public DoctorController(IDoctorService service, IVerifyEmailService verifyService)
     {
         _service = service;
+        _verifyService = verifyService;
     }
 
     [AllowAnonymous]
@@ -101,6 +103,17 @@ public class DoctorController : ControllerBase
     {
         var response = await _service.Remove(id); 
         
+        return Ok(response);
+    }
+
+    [AllowAnonymous]
+    [HttpPost("email-validation")]
+    public async Task<IActionResult> VerifyEmail(VerifyEmailDTO dto)
+    {
+        var response = await _verifyService.VerifyEmail(dto);
+
+        if(response.Data) _service.SendCredentials(dto);
+
         return Ok(response);
     }
 }

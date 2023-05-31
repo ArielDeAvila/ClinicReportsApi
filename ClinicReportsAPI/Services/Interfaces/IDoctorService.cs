@@ -15,5 +15,5 @@ public interface IDoctorService
     Task<BaseResponse<bool>> UpdateEmail(UpdateEmailDTO emailDto);
     Task<BaseResponse<bool>> UpdatePassword(UpdatePasswordDTO passwordDto, int id);
     Task<BaseResponse<bool>> Remove(int id);
-
+    void SendCredentials(VerifyEmailDTO dto);
 }

@@ -11,10 +11,12 @@ namespace ClinicReportsAPI.Services;
 public class PatientService : IPatientService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IEmailService _emailService;
 
-    public PatientService(IUnitOfWork unitOfWork)
+    public PatientService(IUnitOfWork unitOfWork, IEmailService emailService)
     {
         _unitOfWork = unitOfWork;
+        _emailService = emailService;
     }
 
     public async Task<BaseResponse<IEnumerable<PatientDTO>>> GetAll()
@@ -63,15 +65,44 @@ public class PatientService : IPatientService
     {
         var response = new BaseResponse<bool>();
 
-        //TODO: encriptar contraseña, verificar que el email y la identificación no existan
-        _unitOfWork.PatientRepository.Create((Patient)patientDTO);
+        var existingDoctor = await _unitOfWork.DoctorRepository
+            .GetDoctor(d => d.Email.Equals(patientDTO.Email) || d.Identification.Equals(patientDTO.Identification));
+
+        if (existingDoctor is not null)
+        {
+            if (existingDoctor.Email.Equals(patientDTO.Email))
+            {
+                response.Success = false;
+                response.Message = ReplyMessage.MESSAGE_EXISTS_EMAIL;
+
+                return response;
+            }
+            else if (existingDoctor.Identification.Equals(patientDTO.Identification))
+            {
+                response.Success = false;
+                response.Message = ReplyMessage.MESSAGE_EXISTS_IDENTIFICATION;
+
+                return response;
+            }
+        }
+
+        var patient = (Patient)patientDTO;
+
+        patient.Password = BC.HashPassword(patientDTO.Password);
+        patient.VerifyToken = await VerifyToken();
+
+        _unitOfWork.PatientRepository.Create(patient);
 
         var created = await _unitOfWork.CommitAsync();
 
-        if(created > 0)
+        response.Data = created > 0;
+        
+
+        if(response.Data)
         {
+            _emailService.SendEmail(patient.Email, patient.VerifyToken, "Patient");
+
             response.Success = true;
-            response.Data = true;
             response.Message = ReplyMessage.MESSAGE_SAVE;
         }
         else
@@ -202,6 +233,23 @@ public class PatientService : IPatientService
         }
 
         return response;
+    }
+
+    private async Task<string> VerifyToken()
+    {
+        string token = TokenGenerator.GenerateRandomToken();
+
+        var exists = await _unitOfWork.PatientRepository.GetPatient(p => p.VerifyToken.Equals(token));
+
+        if (exists is null)
+        {
+            return token;
+        }
+        else
+        {
+            return await VerifyToken();
+        }
+
     }
 
 }

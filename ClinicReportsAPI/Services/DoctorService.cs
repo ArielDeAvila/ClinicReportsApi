@@ -12,10 +12,12 @@ namespace ClinicReportsAPI.Services;
 public class DoctorService : IDoctorService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IEmailService _emailService;
 
-    public DoctorService(IUnitOfWork unitOfWork)
+    public DoctorService(IUnitOfWork unitOfWork, IEmailService emailService)
     {
         _unitOfWork = unitOfWork;
+        _emailService = emailService;
     }
 
     public async Task<BaseResponse<IEnumerable<DoctorDTO>>> GetAll()
@@ -107,19 +109,19 @@ public class DoctorService : IDoctorService
         }
 
         var doctor = (Doctor)dto;
-        doctor.Password = TokenGenerator.GetRandomString(8);
-        doctor.VerifyToken = TokenGenerator.GenerateRandomToken(16);
+        doctor.Password = TokenGenerator.GetRandomString(8); 
+        doctor.VerifyToken = await VerifyToken(); 
 
         _unitOfWork.DoctorRepository.Create(doctor);
 
         var created = await _unitOfWork.CommitAsync();
 
-        //TODO: Enviar correo de verificación y contraseña 
-
         response.Data = created > 0;
 
         if (response.Data)
         {
+            _emailService.SendEmail(doctor.Email, doctor.VerifyToken, "Doctor");
+
             response.Success = true;
             response.Message = ReplyMessage.MESSAGE_SAVE;
         }
@@ -164,7 +166,7 @@ public class DoctorService : IDoctorService
         if (existingDoctor is not null)
         {
             response.Success = false;
-            response.Message = ReplyMessage.MESSAGE_EXISTS;
+            response.Message = ReplyMessage.MESSAGE_EXISTS_EMAIL;
 
             return response;
         }
@@ -198,6 +200,8 @@ public class DoctorService : IDoctorService
         var response = new BaseResponse<bool>();
 
         var doctor = await _unitOfWork.DoctorRepository.GetDoctor(d => d.Id.Equals(id));
+
+        if(doctor.IsFirstLogin) doctor.IsFirstLogin = false;
 
         if(!BC.Verify(passwordDto.OldPassword, doctor.Password))
         {
@@ -250,6 +254,31 @@ public class DoctorService : IDoctorService
         }
 
         return response;
+    }
+
+    public async void SendCredentials(VerifyEmailDTO dto)
+    {
+        var account = await _unitOfWork.DoctorRepository
+            .GetDoctor(d => d.VerifyToken.Equals(dto.VerifyToken) && d.AuditDateDelete == null);
+
+        if (account is not null) _emailService.SendCredentials(account);
+    }
+
+    private async Task<string> VerifyToken()
+    {
+        string token = TokenGenerator.GenerateRandomToken();
+
+        var exists = await _unitOfWork.DoctorRepository.GetDoctor(p => p.VerifyToken.Equals(token));
+
+        if (exists is null)
+        {
+            return token;
+        }
+        else
+        {
+            return await VerifyToken();
+        }
+
     }
 
 

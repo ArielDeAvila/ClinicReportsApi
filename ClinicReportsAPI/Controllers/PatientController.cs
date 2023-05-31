@@ -15,10 +15,12 @@ namespace ClinicReportsAPI.Controllers;
 public class PatientController : ControllerBase
 {
     private readonly IPatientService _service;
+    private readonly IVerifyEmailService _verifyService;
 
-    public PatientController(IPatientService service)
+    public PatientController(IPatientService service, IVerifyEmailService verifyService)
     {
         _service = service;
+        _verifyService = verifyService;
     }
 
     [AuthorizeRole("Hospital")]
@@ -95,6 +97,15 @@ public class PatientController : ControllerBase
 
         return Ok(response);
 
+    }
+
+    [AllowAnonymous]
+    [HttpPost("email-validation")]
+    public async Task<IActionResult> VerifyEmail(VerifyEmailDTO dto)
+    {
+        var response = await _verifyService.VerifyEmail(dto);
+
+        return Ok(response);
     }
 
 

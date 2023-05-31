@@ -1,4 +1,5 @@
-﻿using ClinicReportsAPI.Repositories.Interfaces;
+﻿using ClinicReportsAPI.Data.Entities;
+using ClinicReportsAPI.Repositories.Interfaces;
 
 namespace ClinicReportsAPI.UnitOfWork;
 
@@ -9,6 +10,7 @@ public interface IUnitOfWork
     IPatientRepository PatientRepository { get; }
     IDoctorRepository DoctorRepository { get; }
 
+    void Update(BaseEntity entity);
     void Commit();
     void Dispose();
     Task<int> CommitAsync();

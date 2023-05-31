@@ -36,7 +36,7 @@ public class PatientRepository : GenericRepository<Patient>, IPatientRepository
                                              .Include(p => p.Hospital)
                                              .FirstOrDefaultAsync(expression);
 
-        return patient!;
+        return patient;
     }  
 
     public override async void Update(Patient patient)
@@ -56,13 +56,14 @@ public class PatientRepository : GenericRepository<Patient>, IPatientRepository
         return patient!;
     }
 
-    //TODO: crear nuevos métodos para el cambio de contraseña y de email
+
 
     public void UpdateEmail(Patient patient)
     {
         _context.Patients.Update(patient);
         _context.Entry(patient).Property(d => d.Identification).IsModified = false;
         _context.Entry(patient).Property(d => d.Password).IsModified = false;
+
     }
 
     public void UpdatePassword(Patient patient)

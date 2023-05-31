@@ -1,14 +1,12 @@
-﻿using BC = BCrypt.Net.BCrypt;
-
-namespace ClinicReportsAPI.Tools;
+﻿namespace ClinicReportsAPI.Tools;
 
 public static class TokenGenerator
 {
-    public static string GenerateRandomToken(int length)
+    public static string GenerateRandomToken()
     {
-        var salt = BC.GenerateSalt();
-        var randomToken = BC.HashPassword(GetRandomString(length), salt);
-        return randomToken;
+        string token = Guid.NewGuid().ToString("N");
+
+        return token;
     }
 
     public static string GetRandomString(int length)

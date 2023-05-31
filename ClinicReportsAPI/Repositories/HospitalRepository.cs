@@ -97,6 +97,5 @@ public class HospitalRepository : GenericRepository<Hospital>, IHospitalReposito
         _context.Entry(hospital).Property(d => d.Email).IsModified = false;
     }
 
-    //TODO: crear nuevos métodos para el cambio de contraseña y de email
 
 }

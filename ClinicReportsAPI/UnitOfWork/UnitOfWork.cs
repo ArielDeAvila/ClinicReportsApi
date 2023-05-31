@@ -1,4 +1,5 @@
 ﻿using ClinicReportsAPI.Data;
+using ClinicReportsAPI.Data.Entities;
 using ClinicReportsAPI.Repositories;
 using ClinicReportsAPI.Repositories.Interfaces;
 using Microsoft.Identity.Client;
@@ -53,6 +54,11 @@ public class UnitOfWork : IUnitOfWork
     public void Commit()
     {
         _context.SaveChanges();
+    }
+
+    public void Update(BaseEntity entity) 
+    {
+        _context.Update(entity);
     }
 
     public async Task<int> CommitAsync()

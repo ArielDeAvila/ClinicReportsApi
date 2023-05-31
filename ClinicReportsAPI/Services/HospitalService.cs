@@ -12,10 +12,12 @@ namespace ClinicReportsAPI.Services;
 public class HospitalService : IHospitalService
 {
     private readonly IUnitOfWork _unitOfWork;
+    private readonly IEmailService _emailService;
 
-    public HospitalService(IUnitOfWork unitOfWork)
+    public HospitalService(IUnitOfWork unitOfWork, IEmailService emailService)
     {
         _unitOfWork = unitOfWork;
+        _emailService = emailService;
     }
 
     public async Task<BaseResponse<IEnumerable<HospitalDTO>>> GetAll()
@@ -96,13 +98,34 @@ public class HospitalService : IHospitalService
     {
         var response = new BaseResponse<bool>();
 
-        //TODO: verificar que el email y la identificación no existan
+        var existingHospital = await _unitOfWork.HospitalRepository
+            .GetHospital(d => d.Email.Equals(hospitalDTO.Email) || d.Identification.Equals(hospitalDTO.Identification));
+
+        if (existingHospital is not null)
+        {
+            if (existingHospital.Email.Equals(hospitalDTO.Email))
+            {
+                response.Success = false;
+                response.Message = ReplyMessage.MESSAGE_EXISTS_EMAIL;
+
+                return response;
+            }
+            else if (existingHospital.Identification.Equals(hospitalDTO.Identification))
+            {
+                response.Success = false;
+                response.Message = ReplyMessage.MESSAGE_EXISTS_IDENTIFICATION;
+
+                return response;
+            }
+        }
 
         var hospital = (Hospital)hospitalDTO;
 
         var medicalServices = ConvertList.ToListMedicalService(hospitalDTO.Services);
 
-        //TODO: encriptar contraseña
+        hospital.Password = BC.HashPassword(hospital.Password);
+        hospital.VerifyToken = await VerifyToken();
+
         _unitOfWork.HospitalRepository.Create(hospital,medicalServices);
 
         var created = await _unitOfWork.CommitAsync();
@@ -111,6 +134,8 @@ public class HospitalService : IHospitalService
 
         if(response.Data)
         {
+            _emailService.SendEmail(hospital.Email, hospital.VerifyToken, "Hospital");
+
             response.Success = true;
             response.Message = ReplyMessage.MESSAGE_SAVE;
         }
@@ -272,4 +297,23 @@ public class HospitalService : IHospitalService
 
         return response;
     }
+
+    private async Task<string> VerifyToken()
+    {
+        string token = TokenGenerator.GenerateRandomToken();
+
+        var exists = await _unitOfWork.HospitalRepository.GetHospital(p => p.VerifyToken.Equals(token));
+
+        if (exists is null)
+        {
+            return token;
+        }
+        else
+        {
+            return await VerifyToken();
+        }
+
+    }
+
+
 }

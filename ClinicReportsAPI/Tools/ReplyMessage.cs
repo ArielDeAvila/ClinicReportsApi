@@ -19,5 +19,6 @@ public class ReplyMessage
     public const string MESSAGE_VERIFIED = "Cuenta verificada con éxito";
     public const string MESSAGE_ALREADY_VERIFIED = "La cuenta ya se encuentra verificada";
     public const string MESSAGE_UNVERIFIED = "La cuenta no se encuentra verificada";
+    public const string MESSAGE_INVALID_TOKEN = "Las credenciales utilizadas son inválidas";
 
 }

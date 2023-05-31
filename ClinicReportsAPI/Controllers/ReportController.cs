@@ -1,9 +1,12 @@
 ﻿using ClinicReportsAPI.DTOs;
+using ClinicReportsAPI.Extensions;
 using ClinicReportsAPI.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ClinicReportsAPI.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class ReportController : ControllerBase
@@ -15,7 +18,7 @@ public class ReportController : ControllerBase
         _service = service;
     }
 
-    //TODO: no deben ser accedida por usuarios que no sean de tipo hospital
+    [AuthorizeRole("Hospital")]
     [HttpGet("GetAll/Hospital/{id:int}")]
     public async Task<IActionResult> GetAllReportsByHospital(int id)
     {
@@ -24,7 +27,7 @@ public class ReportController : ControllerBase
         return Ok(response);
     }
 
-    //TODO: no deben ser accedida por usuarios que no sean de tipo Doctor
+    [AuthorizeRole("Doctor")]
     [HttpGet("GetAll/Doctor/{id:int}")]
     public async Task<IActionResult> GetAllReportsByDoctor(int id)
     {
@@ -33,7 +36,8 @@ public class ReportController : ControllerBase
         return Ok(response);
     }
 
-    //TODO: no deben ser accedida por usuarios que no sean de tipo Patient
+
+    [AuthorizeRole("Patient")]
     [HttpGet("GetAll/Patient/{id:int}")]
     public async Task<IActionResult> GetAllReportsByPatient(int id)
     {
@@ -50,7 +54,7 @@ public class ReportController : ControllerBase
         return Ok(response);
     }
 
-    //TODO: no deben ser accedida por usuarios que no sean de tipo Doctor
+    [AuthorizeRole("Doctor")]
     [HttpPost("Save")]
     public async Task<IActionResult> CreateReport([FromBody] ReportDTO reportDTO)
     {
@@ -58,8 +62,8 @@ public class ReportController : ControllerBase
 
         return Ok(response);
     }
-
-    //TODO: no deben ser accedida por usuarios que no sean de tipo Doctor y hospital
+ 
+    [AuthorizeRole("Hospital","Doctor")]
     [HttpPut("Update")]
     public async Task<IActionResult> UpdateReport([FromBody] ReportDTO reportDTO)
     {
@@ -68,7 +72,7 @@ public class ReportController : ControllerBase
         return Ok(response);    
     }
 
-    //TODO: no deben ser accedida por usuarios que no sean de tipo Doctor y hospital
+    [AuthorizeRole("Hospital")]
     [HttpDelete("Remove/{id:int}")]
     public async Task<IActionResult> RemoveReport(int id)
     {

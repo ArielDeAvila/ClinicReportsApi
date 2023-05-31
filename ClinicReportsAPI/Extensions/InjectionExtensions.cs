@@ -13,6 +13,7 @@ public static class InjectionExtensions
         services.AddScoped<IDoctorService, DoctorService>();
         services.AddScoped<ILoginService, LoginService>();
         services.AddScoped<IEmailService, EmailService>();
+        services.AddScoped<IVerifyEmailService, VerifyEmailService>();
         
         return services;
     }
