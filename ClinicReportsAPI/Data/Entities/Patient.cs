@@ -3,6 +3,7 @@
 public class Patient : BaseUser
 {
     public DateTime BirthDate { get; set; }
+    public char Gender { get; set; } 
 
     public int HospitalId { get; set; }
     public Hospital Hospital { get; set; } = null!;

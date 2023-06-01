@@ -80,4 +80,14 @@ public class ReportController : ControllerBase
 
         return Ok(response);
     }
+
+    [AllowAnonymous]
+    [HttpPost("Download/{id:int}")]
+    public async Task<IActionResult> DownloadFile(int id)
+    {
+        var file = await _service.DownloadReport(id);
+
+        return File(file, "application/pdf", "report.pdf");
+
+    }
 }

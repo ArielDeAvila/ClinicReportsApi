@@ -17,4 +17,6 @@ public class Report : BaseEntity
 
     public string Treatment { get; set; } = null!;
 
+    public DateTime GenerateDate { get; set; }
+
 }

@@ -12,4 +12,5 @@ public interface IReportService
     Task<BaseResponse<bool>> Create(ReportDTO reportDto);
     Task<BaseResponse<bool>> Update(ReportDTO reportDto);
     Task<BaseResponse<bool>> Remove(int id);
+    Task<byte[]> DownloadReport(int id);
 }

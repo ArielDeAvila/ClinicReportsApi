@@ -2,6 +2,7 @@
 using ClinicReportsAPI.Data.Entities;
 using ClinicReportsAPI.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace ClinicReportsAPI.Repositories;
 
@@ -56,4 +57,14 @@ public class ReportRepository : GenericRepository<Report>, IReportRepository
         return report!;
 
     }
+
+    public async Task<Report> GetReport(Expression<Func<Report, bool>> expression)
+    {
+        var report = await _context.Reports.Include(r => r.Hospital)
+                                           .Include(r => r.Patient)
+                                           .Include(r => r.Doctor)
+                                           .AsNoTracking().FirstOrDefaultAsync(expression);
+
+        return report!;
+    } 
 }

@@ -169,5 +169,15 @@ public class ReportService : IReportService
     
     }
 
+    public async Task<byte[]> DownloadReport(int id)
+    {
+        var report = await _unitOfWork.ReportRepository.GetReport(r => r.Id.Equals(id));
+
+        var document = TemplateReport.GenerateDocument(report);
+
+        return document;
+
+    }
+
     
 }
