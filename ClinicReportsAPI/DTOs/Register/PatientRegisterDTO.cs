@@ -5,7 +5,6 @@ namespace ClinicReportsAPI.DTOs.Register;
 
 public class PatientRegisterDTO
 {
-    public int Id { get; set; }
     public string Name { get; set; } = null!;
     public string Email { get; set; } = null!;
     public string Password { get; set; } = null!;
@@ -20,7 +19,6 @@ public class PatientRegisterDTO
     {
         if (dto is not null) return new Patient
         {
-            Id = dto.Id,
             Name = dto.Name,
             Email = dto.Email,
             Password = dto.Password,

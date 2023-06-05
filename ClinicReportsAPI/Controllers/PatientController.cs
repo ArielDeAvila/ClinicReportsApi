@@ -50,7 +50,7 @@ public class PatientController : ControllerBase
         return Ok(response);
     }
 
-    //TODO: validar
+    
     [AuthorizeRole("Patient", "Hospital")]
     [HttpPut("Edit")]
     public async Task<IActionResult> Update([FromBody] PatientDTO patientDTO)

@@ -1,5 +1,8 @@
-﻿using ClinicReportsAPI.Services;
+﻿using ClinicReportsAPI.DTOs.Register;
+using ClinicReportsAPI.Services;
 using ClinicReportsAPI.Services.Interfaces;
+using ClinicReportsAPI.Validations.Register;
+using FluentValidation;
 
 namespace ClinicReportsAPI.Extensions;
 
@@ -14,6 +17,10 @@ public static class InjectionExtensions
         services.AddScoped<ILoginService, LoginService>();
         services.AddScoped<IEmailService, EmailService>();
         services.AddScoped<IVerifyEmailService, VerifyEmailService>();
+
+        services.AddScoped<IValidator<HospitalRegisterDTO>, HospitalRegisterValidation>();
+        services.AddScoped<IValidator<DoctorRegisterDTO>, RegisterDoctorValidation>();
+        services.AddScoped<IValidator<PatientRegisterDTO>, PatientRegisterValidation>();
         
         return services;
     }

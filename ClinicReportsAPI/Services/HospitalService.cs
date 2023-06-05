@@ -5,6 +5,7 @@ using ClinicReportsAPI.DTOs.Register;
 using ClinicReportsAPI.Services.Interfaces;
 using ClinicReportsAPI.Tools;
 using ClinicReportsAPI.UnitOfWork;
+using FluentValidation;
 using BC = BCrypt.Net.BCrypt;
 
 namespace ClinicReportsAPI.Services;
@@ -13,11 +14,13 @@ public class HospitalService : IHospitalService
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEmailService _emailService;
+    private readonly IValidator<HospitalRegisterDTO> _validator;
 
-    public HospitalService(IUnitOfWork unitOfWork, IEmailService emailService)
+    public HospitalService(IUnitOfWork unitOfWork, IEmailService emailService, IValidator<HospitalRegisterDTO> validator)
     {
         _unitOfWork = unitOfWork;
         _emailService = emailService;
+        _validator = validator;
     }
 
     public async Task<BaseResponse<IEnumerable<HospitalDTO>>> GetAll()
@@ -97,6 +100,16 @@ public class HospitalService : IHospitalService
     public async Task<BaseResponse<bool>> Create(HospitalRegisterDTO hospitalDTO)
     {
         var response = new BaseResponse<bool>();
+        var validation = await _validator.ValidateAsync(hospitalDTO);
+
+        if (!validation.IsValid)
+        {
+            response.Success = false;
+            response.Message = ReplyMessage.MESSAGE_VALIDATE;
+            response.Errors = validation.Errors;
+
+            return response;
+        }
 
         var existingHospital = await _unitOfWork.HospitalRepository
             .GetHospital(d => d.Email.Equals(hospitalDTO.Email) || d.Identification.Equals(hospitalDTO.Identification));
