@@ -44,10 +44,15 @@ public class ReportService : IReportService
 
         var reports = await _unitOfWork.ReportRepository.GetAllReportsByDoctor(doctorId);
 
+        
+
         if(reports is not null)
         {
+            var data = new List<ReportDTO>();
+                foreach (var report in reports) data.Add((ReportDTO)report);
+
             response.Success = true;
-            response.Data = (List<ReportDTO>?)reports;
+            response.Data = data;
             response.Message = ReplyMessage.MESSAGE_QUERY;
         }
         else
@@ -67,8 +72,11 @@ public class ReportService : IReportService
 
         if(reports is not null)
         {
+            var data = new List<ReportDTO>();
+                foreach (var report in reports) data.Add((ReportDTO)report);
+
             response.Success = true;
-            response.Data = (List<ReportDTO>)reports;
+            response.Data = data;
             response.Message = ReplyMessage.MESSAGE_QUERY;
         }
         else
@@ -88,8 +96,11 @@ public class ReportService : IReportService
 
         if (reports is not null)
         {
+            var data = new List<ReportDTO>();
+                foreach (var report in reports) data.Add((ReportDTO)report);
+
             response.Success = true;
-            response.Data = (List<ReportDTO>)reports;
+            response.Data = data;
             response.Message = ReplyMessage.MESSAGE_QUERY;
         }
         else

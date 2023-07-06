@@ -36,17 +36,17 @@ public class ReportDTO
         return default!;
     }
 
-    public static explicit operator Report(ReportDTO report)
+    public static explicit operator Report(ReportDTO reportDto)
     {
-        if (report is not null) return new Report()
+        if (reportDto is not null) return new Report()
         {
-            Id = report.Id,
-            Diagnosis = report.Diagnosis,
-            Observation = report.Observation,
-            Treatment = report.Treatment,
-            HospitalId = report.Hospital.Id,
-            DoctorId = report.Doctor.Id,
-            PatientId = report.Patient.Id
+            Id = reportDto.Id,
+            Diagnosis = reportDto.Diagnosis,
+            Observation = reportDto.Observation,
+            Treatment = reportDto.Treatment,
+            HospitalId = reportDto.Hospital.Id,
+            DoctorId = reportDto.Doctor.Id,
+            PatientId = reportDto.Patient.Id
         };
 
         return default!;

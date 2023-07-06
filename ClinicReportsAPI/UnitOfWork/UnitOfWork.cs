@@ -2,7 +2,6 @@
 using ClinicReportsAPI.Data.Entities;
 using ClinicReportsAPI.Repositories;
 using ClinicReportsAPI.Repositories.Interfaces;
-using Microsoft.Identity.Client;
 
 namespace ClinicReportsAPI.UnitOfWork;
 

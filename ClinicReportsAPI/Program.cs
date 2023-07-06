@@ -2,6 +2,8 @@ using ClinicReportsAPI.Data;
 using ClinicReportsAPI.Extensions;
 using ClinicReportsAPI.UnitOfWork;
 using Microsoft.EntityFrameworkCore;
+using QuestPDF.Infrastructure;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,6 +45,8 @@ using(var scope = app.Services.CreateScope())
     SystemReportContext context = scope.ServiceProvider.GetRequiredService<SystemReportContext>();
     context.Database.Migrate();
 }
+
+QuestPDF.Settings.License = LicenseType.Community;
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
