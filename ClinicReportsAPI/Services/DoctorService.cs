@@ -29,10 +29,13 @@ public class DoctorService : IDoctorService
 
         var doctors = await _unitOfWork.DoctorRepository.GetAll();
 
-        if(doctors.Any())
+        if(doctors is not null)
         {
+            var data = new List<DoctorDTO>();
+                foreach (var doctor in doctors) data.Add((DoctorDTO)doctor);
+
             response.Success = true;
-            response.Data = (List<DoctorDTO>)doctors;
+            response.Data = data;
             response.Message = ReplyMessage.MESSAGE_QUERY;
         }
         else
@@ -50,10 +53,13 @@ public class DoctorService : IDoctorService
 
         var doctors = await _unitOfWork.DoctorRepository.GetAll();
 
-        if(doctors.Any())
+        if(doctors is not null)
         {
+            var data = new List<DoctorNameDTO>();
+                foreach (var doctor in doctors) data.Add((DoctorNameDTO)doctor);
+
             response.Success = true;
-            response.Data = (List<DoctorNameDTO>)doctors;
+            response.Data = data;
             response.Message = ReplyMessage.MESSAGE_QUERY;
         }
         else
@@ -155,10 +161,11 @@ public class DoctorService : IDoctorService
 
         var updated = await _unitOfWork.CommitAsync();
 
-        if(updated > 0)
+        response.Data = updated > 0;
+
+        if(response.Data)
         {
             response.Success = true;
-            response.Data = true;
             response.Message = ReplyMessage.MESSAGE_UPDATE;
         }
         else
@@ -254,10 +261,11 @@ public class DoctorService : IDoctorService
 
         var removed = await _unitOfWork.CommitAsync();
 
-        if(removed > 0)
+        response.Data = removed > 0;
+
+        if(response.Data)
         {
             response.Success = true;
-            response.Data = true;
             response.Message = ReplyMessage.MESSAGE_DELETE;
         }
         else
