@@ -29,15 +29,14 @@ public class HospitalService : IHospitalService
 
         var hospitals = await _unitOfWork.HospitalRepository.GetAll();
 
-        //var hospitalsDTO = new List<HospitalDTO>();
-        //foreach (var hospital in hospitals) hospitalsDTO.Add((HospitalDTO)hospital);
-
-        var hospitalsDTO = (List<HospitalDTO>)hospitals;
 
         if (hospitals is not null)
         {
+            var data = new List<HospitalDTO>();
+                foreach (var hospital in hospitals) data.Add((HospitalDTO)hospital);
+
             response.Success = true;
-            response.Data = hospitalsDTO;
+            response.Data = data;
             response.Message = ReplyMessage.MESSAGE_QUERY;
 
         }
@@ -56,13 +55,13 @@ public class HospitalService : IHospitalService
 
         var hospitals = await _unitOfWork.HospitalRepository.GetAll();
 
-        var hospitalsDTO = new List<HospitalNameDTO>();
-        foreach (var hospital in hospitals) hospitalsDTO.Add((HospitalNameDTO)hospital);
-
         if (hospitals is not null)
         {
+            var data = new List<HospitalNameDTO>();
+                foreach (var hospital in hospitals) data.Add((HospitalNameDTO)hospital);
+
             response.Success = true;
-            response.Data = hospitalsDTO;
+            response.Data = data;
             response.Message = ReplyMessage.MESSAGE_QUERY;
 
         }
