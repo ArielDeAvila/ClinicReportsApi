@@ -8,7 +8,6 @@ using ClinicReportsAPI.UnitOfWork;
 using ClinicReportsAPI.Validations.Register;
 using Moq;
 using System.Linq.Expressions;
-using System.Xml;
 
 namespace UnitTests.ServiceTests;
 

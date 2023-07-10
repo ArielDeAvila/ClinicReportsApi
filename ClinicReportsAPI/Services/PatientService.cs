@@ -30,8 +30,11 @@ public class PatientService : IPatientService
 
         if(patients is not null)
         {
+            var data = new List<PatientDTO>();
+                foreach (var patient in patients) data.Add((PatientDTO)patient);
+
             response.Success = true;
-            response.Data = (List<PatientDTO>)patients;
+            response.Data = data;
             response.Message = ReplyMessage.MESSAGE_QUERY;
         }
         else
@@ -78,8 +81,8 @@ public class PatientService : IPatientService
             return response;
         }
 
-        var existingDoctor = await _unitOfWork.DoctorRepository
-            .GetDoctor(d => d.Email.Equals(patientDTO.Email) || d.Identification.Equals(patientDTO.Identification));
+        var existingDoctor = await _unitOfWork.PatientRepository
+            .GetPatient(d => d.Email.Equals(patientDTO.Email) || d.Identification.Equals(patientDTO.Identification));
 
         if (existingDoctor is not null)
         {
@@ -135,10 +138,11 @@ public class PatientService : IPatientService
 
         var updated = await _unitOfWork.CommitAsync();
 
-        if(updated > 0)
+        response.Data = updated > 0;
+
+        if (response.Data)
         {
             response.Success = true;
-            response.Data = true;
             response.Message = ReplyMessage.MESSAGE_UPDATE;
         }
         else
@@ -233,10 +237,11 @@ public class PatientService : IPatientService
 
         var removed = await _unitOfWork.CommitAsync();
 
-        if(removed > 0)
+        response.Data = removed > 0;
+
+        if(response.Data)
         {
             response.Success = true;
-            response.Data = true;
             response.Message = ReplyMessage.MESSAGE_DELETE;
         }
         else
